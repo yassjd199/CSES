@@ -41,36 +41,10 @@ template <typename K , typename V>
 using Map = tree<K , V , less<K> , rb_tree_tag , tree_order_statistics_node_update>;
 
 
-ll st[4 * N];
-ll merg(ll l , ll r) {
-    return max(l , r);
-}
-
-int n;
-
-void upd(int pos , ll val , int cur = 0 , int s = 0 , int e = n) {
-    if (s == e) {
-        st[cur] = val;
-        return;
-    }
-    int m = (s + e) >> 1;
-    (pos <= m) ? upd(pos , val , 2 * cur + 1 , s , m) : upd(pos , val , 2 * cur + 2 , m + 1 , e);
-    st[cur] = merg(st[2 * cur + 1] , st[2 * cur + 2]);
-}
-
-ll query(int l , int r , int cur = 0 , int s = 0 , int e = n) {
-    if (e < l || s > r) return 0ll;
-    if (s >= l && e <= r) {
-        return st[cur];
-    }
-    int m = (s + e) >> 1;
-    return merg(query(l , r , 2 * cur + 1 , s , m) , query(l , r , 2 * cur + 2 , m + 1 , e));
-}
-
 
 
 void testcase() {
-    n; cin >> n;
+    int n; cin >> n;
     vector<vll> A(n);
     for (int i = 0; i < n; i++) {
         ll L , R , C;
@@ -87,14 +61,14 @@ void testcase() {
         L[i] = A[i][1];
         C[i] = A[i][2];
     }
-
+    vll prefMx(n + 1 , 0);
     for (int i = 1; i <= n; i++) {
         int pos = lower_bound(all(R) , L[i - 1]) - R.begin();
-        dp[i] = C[i - 1] + query(0 , pos);
-        upd(i , dp[i]);
+        dp[i] = max(dp[i - 1] , C[i - 1] + prefMx[pos]);
+        prefMx[i] = max(prefMx[i - 1] , dp[i]);
     }
 
-    cout << *max_element(all(dp)) << endl;
+    cout << dp[n] << endl;
 
 
 
